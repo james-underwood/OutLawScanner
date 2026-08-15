@@ -41,6 +41,50 @@ to Metrc directly. Run it in shadow mode alongside manual counting until the
 divergence data proves it. RFID is Phase 3 and belongs on *totes and cases*,
 not on individual eighths. LiDAR and smart shelves do not earn their cost here.
 
-## Status
+## Running it
 
-Design phase. No implementation yet.
+```bash
+npm install
+npm run dev            # http://localhost:5173
+npm test               # unit tests — counting, consensus, scale, reconciliation
+npm run build && npm run smoke   # end-to-end browser test against the built app
+```
+
+Open the app, press **Load demo data**, and start a session. No backend, no
+accounts, no network — everything lives in IndexedDB on the device.
+
+## What is built
+
+Phases 0–2 of the roadmap in [doc 01](docs/01-architecture.md):
+
+- **Offline-first store** (Dexie/IndexedDB) — expected inventory, sessions, and
+  an append-only count-event log with client-generated idempotency keys.
+- **Pluggable count sources** behind one `CountSource` interface, routed
+  per package by `supports()`:
+  - **Camera** — adaptive thresholding, 8-connected component labelling, and
+    footprint-prior blob splitting. No model, no training data, no drift.
+  - **Scale** — Web Bluetooth, supporting both the SIG Weight Scale Service and
+    the ASCII serial output cheap bench scales actually emit.
+  - **Manual** — always available, always one tap away.
+- **Multi-frame consensus** — an answer is withheld until N of the last M frames
+  agree, which is also where the confidence number comes from.
+- **Confidence gating** — automated counts pre-fill for confirmation only above
+  a deliberately conservative threshold; below it, the operator counts by hand.
+- **Shadow mode** — automated sources run unseen and are scored against the
+  operator's manual count, producing per-SKU accuracy before anything is trusted.
+- **Reconciliation** — variance classification with per-UoM tolerances, unexpected
+  packages, and escalation of reportable variances.
+- **Export** — discrepancy CSV, full event log, and an audit report.
+
+## What is not built, deliberately
+
+- **No write path to Metrc.** The app produces observations and exports them;
+  the system of record applies adjustments. That preserves the single-writer
+  rule structurally rather than by convention — see
+  [doc 02](docs/02-integration-metrc-outlaw.md) for why, and for what becoming a
+  validated Metrc integrator actually costs.
+- **No sync server yet.** The outbox and idempotency keys are in place; the
+  endpoint they post to is not.
+- **No fine-tuned detector.** The classical pipeline handles single-layer
+  homogeneous groups. A trained model slots in behind `CountSource` when the
+  shadow-mode data shows where it is needed.

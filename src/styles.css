@@ -1,0 +1,136 @@
+:root {
+  --bg: #0b0f14;
+  --surface: #141a22;
+  --surface-2: #1c242e;
+  --line: #2a3440;
+  --text: #e6edf3;
+  --muted: #8b98a5;
+  --accent: #4fb0ff;
+  --ok: #3fb950;
+  --warn: #d29922;
+  --bad: #f85149;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+button {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  cursor: pointer;
+  /* Vault staff wear gloves; nothing tappable gets smaller than this. */
+  min-height: 48px;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #04121f; font-weight: 600; }
+button.ghost { background: transparent; }
+
+input, select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  min-height: 48px;
+  width: 100%;
+}
+
+.app { max-width: 820px; margin: 0 auto; padding: 16px 16px 96px; }
+
+header.bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid var(--line); margin-bottom: 20px;
+}
+header.bar h1 { font-size: 17px; margin: 0; letter-spacing: 0.3px; }
+header.bar .sub { color: var(--muted); font-size: 13px; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+}
+.card h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin: 0 0 12px; }
+
+.row { display: flex; gap: 10px; align-items: center; }
+.row.wrap { flex-wrap: wrap; }
+.spread { justify-content: space-between; }
+.grow { flex: 1; min-width: 0; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+
+.muted { color: var(--muted); }
+.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
+.small { font-size: 13px; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pill {
+  display: inline-block; padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+  border: 1px solid var(--line); color: var(--muted);
+}
+.pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.pill.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.pill.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+.pill.accent { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+.pkg {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 12px; background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--radius); margin-bottom: 8px;
+}
+.pkg .name { font-weight: 600; }
+.pkg .qty { font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 600; }
+
+.readout {
+  text-align: center; padding: 20px 12px; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: var(--radius);
+}
+.readout .value { font-size: 56px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.readout .unit { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+.meter { height: 5px; background: var(--line); border-radius: 999px; overflow: hidden; margin-top: 14px; }
+.meter > span { display: block; height: 100%; background: var(--accent); transition: width 140ms linear; }
+.meter.ok > span { background: var(--ok); }
+.meter.warn > span { background: var(--warn); }
+
+video { width: 100%; border-radius: var(--radius); background: #000; display: block; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.scroll-x { overflow-x: auto; }
+
+.banner {
+  border-radius: var(--radius); padding: 12px 14px; margin-bottom: 14px; font-size: 13px;
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
+  background: color-mix(in srgb, var(--warn) 10%, transparent);
+}
+.banner.bad {
+  border-color: color-mix(in srgb, var(--bad) 45%, transparent);
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+}
+
+.item-cell { max-width: 220px; }
+
+/* Handhelds are the primary target, so the variance and status columns must
+   survive the narrow viewport — the method column is the one that can go. */
+@media (max-width: 560px) {
+  .hide-narrow { display: none; }
+  .item-cell { max-width: 84px; }
+  th, td { padding: 8px 5px; }
+  th { font-size: 10px; }
+  .pill { font-size: 9px; padding: 2px 5px; letter-spacing: 0.3px; }
+}
