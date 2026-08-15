@@ -6,12 +6,13 @@ import { reconcile } from '../domain/reconcile';
 import { scoreShadowMode } from '../domain/shadow';
 import type { AuditSession, CountEvent, ExpectedInventory, SessionMode } from '../domain/types';
 import { attachWedgeListener, looksLikeMetrcLabel } from '../barcode/detector';
+import type { StorageMode } from '../db/storage';
 import { CountPanel } from './CountPanel';
 import { ReviewScreen } from './ReviewScreen';
 
 type View = 'setup' | 'count' | 'review';
 
-export function App() {
+export function App({ storage }: { storage: StorageMode }) {
   const [view, setView] = useState<View>('setup');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
@@ -111,6 +112,7 @@ export function App() {
     return (
       <div className="app">
         <Header subtitle="Automated inventory counting" />
+        <StorageWarning storage={storage} />
         <SetupScreen onStart={startSession} />
       </div>
     );
@@ -120,6 +122,7 @@ export function App() {
     return (
       <div className="app">
         <Header subtitle={`${session.facilityLicense} · ${session.zone ?? 'all zones'}`} />
+        <StorageWarning storage={storage} />
         <ReviewScreen
           report={reconcile(session, expected, events)}
           events={events}
@@ -134,6 +137,7 @@ export function App() {
   return (
     <div className="app">
       <Header subtitle={`${session.zone ?? 'all zones'} · ${countedLabels.size}/${expected.length} counted`} />
+      <StorageWarning storage={storage} />
 
       {session.mode === 'shadow' && (
         <div className="banner">
@@ -202,6 +206,21 @@ export function App() {
           Review &amp; export
         </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * When storage is in-memory the operator must know before they spend an hour
+ * counting. Silently losing an audit is the worst failure this app has.
+ */
+function StorageWarning({ storage }: { storage: StorageMode }) {
+  if (storage === 'persistent') return null;
+  return (
+    <div className="banner bad">
+      <strong>This browser is blocking local storage.</strong> The app still works,
+      but the audit is held in memory only and will be lost if you refresh or close
+      the tab. Export before you leave the page.
     </div>
   );
 }

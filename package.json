@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "build:single": "node scripts/build-single-file.mjs"
   },
   "dependencies": {
     "dexie": "^4.4.5",
