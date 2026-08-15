@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import type { ReconciliationReport, CountEvent } from '../domain/types';
-import { countEventCsv, discrepancyCsv, download, reportSummary } from '../domain/export';
+import { countEventCsv, discrepancyCsv, reportSummary } from '../domain/export';
+import { download } from '../domain/download';
 
 interface Props {
   report: ReconciliationReport;
@@ -19,6 +21,21 @@ const CLASS_PILL = {
 export function ReviewScreen({ report, events, onBack }: Props) {
   const reportable = report.rows.filter((r) => r.classification === 'reportable');
   const stamp = new Date(report.generatedAt).toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  const [exportStatus, setExportStatus] = useState<string | null>(null);
+
+  // Never let an export fail silently: the file is the only thing this audit
+  // produces, so the operator must know whether they actually got it.
+  const save = async (filename: string, contents: string, mime?: string) => {
+    setExportStatus(null);
+    const outcome = await download(filename, contents, mime);
+    setExportStatus(
+      outcome === 'saved'
+        ? `Saved ${filename}`
+        : outcome === 'declined'
+          ? 'Save cancelled.'
+          : 'This viewer will not allow downloads. Open the app in a browser tab to export.',
+    );
+  };
 
   return (
     <>
@@ -88,16 +105,21 @@ export function ReviewScreen({ report, events, onBack }: Props) {
           to compliance.
         </p>
         <div className="row wrap">
-          <button onClick={() => download(`discrepancies-${stamp}.csv`, discrepancyCsv(report), 'text/csv')}>
+          <button onClick={() => void save(`discrepancies-${stamp}.csv`, discrepancyCsv(report), 'text/csv')}>
             Discrepancy CSV
           </button>
-          <button onClick={() => download(`count-events-${stamp}.csv`, countEventCsv(events), 'text/csv')}>
+          <button onClick={() => void save(`count-events-${stamp}.csv`, countEventCsv(events), 'text/csv')}>
             Event log CSV
           </button>
-          <button onClick={() => download(`audit-report-${stamp}.txt`, reportSummary(report))}>
+          <button onClick={() => void save(`audit-report-${stamp}.txt`, reportSummary(report))}>
             Audit report
           </button>
         </div>
+        {exportStatus && (
+          <div className="small muted" style={{ marginTop: 10 }} role="status">
+            {exportStatus}
+          </div>
+        )}
       </div>
     </>
   );

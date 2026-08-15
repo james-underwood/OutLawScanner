@@ -133,12 +133,3 @@ export function reportSummary(report: ReconciliationReport): string {
 
   return lines.join('\n');
 }
-
-export function download(filename: string, contents: string, mime = 'text/plain'): void {
-  const url = URL.createObjectURL(new Blob([contents], { type: `${mime};charset=utf-8` }));
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
